@@ -9,6 +9,33 @@
 	call  传参数
 	apply  传数组
 	3.防抖（当持续触发事件时，一定时间段内没有再触发事件，事件处理函数才会执行一次）
+	4.节流 （搜索）
+	
+	function throttle(fn,interval = 1000){
+		let timer;
+	    return function (...args){
+			if(timer){
+				clearTimeout(timer)
+			}
+			timer =setTimeout(()=>{
+				fn(...args);
+				timer=null;
+			},interval)
+		}
+		
+	}
+	
+	function a (e){
+		console.log(e.target.value)
+		console.log(obj)
+	}
+	let obj = {a:1,b:"C"}
+	document.getElementById('inp').addEventListener('keyup',throttle((e)=>a(e,obj),1000))
+	
+	
+	
+	
+	
 	4.数组获取相同元素（filter, includes）
 	5.数组获取差异元素
 	6.数组对象去掉相同对象
@@ -50,7 +77,7 @@
 		color:'red',
 		background:'yellow'
 	});
-	
+	28.
 	<body>
 	</body>
 </html>
