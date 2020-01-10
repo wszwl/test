@@ -1,12 +1,42 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-	</head>
-	<body>
-		1.group by 分组可接多个字段
-		2.distinct 过滤
-		3.
-	</body>
-</html>
+一，存储过程
+
+1. if elseif else 使用  begin 和end相当于{}
+CREATE proc [dbo].[ceshi1] 
+@num varchar(1000),
+@statu varchar(100)
+AS
+BEGIN
+declare @basicSql varchar(8000)
+--select top 100 * from EYB_tb_JiChun
+set @basicSql = 'select top '
+if @statu =1
+set @basicSql =@basicSql+''+@num+'* from EYB_tb_JiChun'
+else if @statu = 2
+set @basicSql =@basicSql+''+'20* from EYB_tb_JiChun'
+else
+set @basicSql =@basicSql+''+'30* from EYB_tb_JiChun'
+exec(@basicSql)
+END
+
+2.在where加判断条件 使用case when
+alter proc ceshi
+@a varchar(1000),
+@b varchar(1000) 
+as
+select TOP 100 *  from EYB_tb_HospitalUser where (1 = (case when @a is null then 1 else 0 end) or HospitalID =@a) and sex=@b
+----------------------------------------------------2-------------------------------------
+alter proc ceshi
+@a varchar(1000),
+@b varchar(1000),
+@c varchar(1000) 
+as
+select TOP 100 *  from EYB_tb_HospitalUser where HospitalID = (case when @a <> 1 then @b else @c end) 
+
+
+二,sql 语句
+sql
+1.指定表作为查询表,必须使用as 
+SELECT * FROM ( SELECT TOP 100 * FROM EYB_tb_HospitalUser) as t  where HospitalID = 644
+2.ORDER BY query asc   --asc 顺序  desc 降序
+3.group by 分组可接多个字段
+4.distinct 过滤
