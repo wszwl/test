@@ -24,6 +24,7 @@ alter proc ceshi
 @b varchar(1000) 
 as
 select TOP 100 *  from EYB_tb_HospitalUser where (1 = (case when @a is null then 1 else 0 end) or HospitalID =@a) and sex=@b
+
 ----------------------------------------------------2-------------------------------------
 alter proc ceshi
 @a varchar(1000),
@@ -31,6 +32,33 @@ alter proc ceshi
 @c varchar(1000) 
 as
 select TOP 100 *  from EYB_tb_HospitalUser where HospitalID = (case when @a <> 1 then @b else @c end) 
+
+3.分页
+1.简单的说row_number()从1开始，为每一条分组记录返回一个数字，这里的ROW_NUMBER() OVER (ORDER BY xlh DESC) 是先把xlh列降序，再为降序以后的没条xlh记录返回一个序号。 
+1.1 先排序后添加序号
+2.row_number() OVER (PARTITION BY COL1 ORDER BY COL2) 表示根据COL1分组，在分组内部根据 COL2排序，而此函数计算的值就表示每组内部排序后的顺序编号（组内连续的唯一的)
+2.1 先分组在排序最后添加序号
+
+create proc ceshi6
+@pagesize int =3, -- 
+@index int = 1, --查看第几页
+@recordcount int output, --总数
+@pagecount int output  --总页数
+as
+begin
+select * from ( select * ,rn =row_number() over (order by userID ASC ) FROM EYB_tb_HospitalUser ) AS t
+where t.rn between (@index-1) *@pagesize+1 and  @pagesize * @index
+set @recordcount =(select count(*) from EYB_tb_HospitalUser )
+set @pagecount = ceiling(@recordcount*1.0/@pagesize) --ceiling向上取整
+end
+
+执行
+declare @tiaoshu int 
+declare @yeshu int 
+exec ceshi6  @pagesize =5,@index =3,@recordcount = @tiaoshu output, @pagecount = @yeshu output
+select @tiaoshu as 总的条数
+select @yeshu as 总的页数
+
 
 
 二,sql 语句
@@ -40,3 +68,5 @@ SELECT * FROM ( SELECT TOP 100 * FROM EYB_tb_HospitalUser) as t  where HospitalI
 2.ORDER BY query asc   --asc 顺序  desc 降序
 3.group by 分组可接多个字段
 4.distinct 过滤
+5.select rn =row_number() over( PARTITION BY hospitalid order by useriD asc) , * from EYB_tb_HospitalUser  
+
