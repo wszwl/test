@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<h4> SQL JOIN</h4>
+		JOIN: 如果表中有至少一个匹配，则返回行
+		LEFT JOIN: 即使右表中没有匹配，也从左表返回所有的行
+		RIGHT JOIN: 即使左表中没有匹配，也从右表返回所有的行
+		FULL JOIN: 只要其中一个表中存在匹配，就返回行
+		INNER JOIN:在表中存在至少一个匹配时，INNER JOIN 关键字返回行。
+		例如
+		SELECT Persons.LastName, Persons.FirstName, Orders.OrderNo
+		FROM Persons
+		INNER JOIN Orders
+		ON Persons.Id_P = Orders.Id_P
+		ORDER BY Persons.LastName
+		
+		例如
+		SELECT  SUM(PayMoney)                                  
+		FROM    EYB_tb_Order o                                  
+	    INNER JOIN Eyb_tb_PaymentOrder p                                  
+		ON  o.OrderNo = p.OrderNo AND                                  
+		( p.PayType IN (1,2) OR  
+		  p.ParentPayType = 1                                  
+		 ) 
+		 WHERE   o.Statu = 1 AND                                  
+		 HospitalID = 2 AND                                  
+		 CreateTime BETWEEN '2020/2/10 00:00:00'                               
+		 AND  '2020/2/10 23:59:59'
+		
+		1.  多条件 就在 on 后面 a.id = b.id and (条件1,条件2)
+		
+		<h4>SQL UNION 操作符</h4>
+		UNION 操作符用于合并两个或多个 SELECT 语句的结果集。
+		UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型
+		同时，每条 SELECT 语句中的列的顺序必须相同。
+		例如
+		SELECT column_name(s) FROM table_name1
+		UNION
+		SELECT column_name(s) FROM table_name2
+		<h4>select into</h4>
+		SELECT INTO 语句
+		SELECT INTO 语句从一个表中选取数据，然后把数据插入另一个表中。
+		SELECT INTO 语句常用于创建表的备份复件或者用于对记录进行存档。
+		例如:
+		SELECT *
+		INTO Persons_backup
+		FROM Persons
+	</body>
+</html>

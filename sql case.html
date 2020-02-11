@@ -1,0 +1,139 @@
+-- =============================================      
+
+-- Author:  <Author,,Name>      
+
+-- Create date: <Create Date,,>      
+
+-- Description: <Description,,>      
+
+-- =============================================      
+
+CREATE PROCEDURE [dbo].[Eyb_tb_PaymentOrderProduct_GetRevenuePerformanceList]      
+
+ @HospitalID int,      
+
+ @StartTime datetime,      
+
+ @EndTime datetime      
+
+AS      
+
+BEGIN      
+
+      
+
+      
+
+--创建局部临时表       
+
+create table #tmp(id int,Income decimal(18,2),Cost decimal(18,2),HospitalID int,HospitalName varchar(50),ParentHospitalID int,Profit decimal(18,2),StartTime datetime,EndTime datetime,OutMoney decimal(18,2),InMoney decimal(18,2))      
+
+      
+
+      
+
+       
+
+  --现金收入 欠款不算    
+
+ declare @sumincome decimal(18,2)             
+
+ select @sumincome =  Sum(PayMoney)  from   Eyb_Tb_Order b       
+
+ inner join Eyb_tb_PaymentOrder c on c.OrderNo=b.OrderNo
+
+ where b.Statu=1 and c.ParentPayType=1 and b.HospitalID= @HospitalID and b.CreateTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50))      
+
+      
+
+-- declare @sumruku decimal(18,2)   --入库总额      
+
+-- select @sumruku= SUm(b.Quatity*c.CostPrice) from EYB_tb_BuyOrder a inner join Eyb_tb_BuyOrderInfo b on a.OrderNo=b.OrderNo inner join dbo.EYB_tb_Product c on b.ProductID=c.ID      
+
+-- where a.HospitalID=@HospitalID and a.Statu=2 and a.Type=1 and a.CreateTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50))      
+
+--print(@sumruku)      
+
+      
+
+-- declare @sumtuihuo decimal(18,2)   --退货总额      
+
+--select @sumtuihuo=SUm(b.Quatity*c.CostPrice) from EYB_tb_BuyOrder a inner join Eyb_tb_BuyOrderInfo b on a.OrderNo=b.OrderNo inner join dbo.EYB_tb_Product c on b.ProductID=c.ID      
+
+-- where a.HospitalID=@HospitalID and a.Statu=2 and a.Type=2 and a.CreateTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50))      
+
+ 
+
+ 
+
+ --成本=产品销售+院装出库       
+
+ declare @sumcost decimal(18,2) 
+
+  declare @sumcost2 decimal(18,2)         
+
+ --产品销售
+
+ select @sumcost =  Sum(a.Quantity*p.CostPrice)  from Eyb_tb_Orderinfo a         
+
+ inner join Eyb_Tb_Order b on a.OrderNo=b.OrderNo  inner join  Eyb_tb_Product    p on a.ProdcuitID=p.ID
+
+ where b.Statu=1 and (a.InfoBuyType=4) 
+
+   and b.HospitalID= @HospitalID and b.CreateTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50)) 
+
+   
+
+ --院装出库
+
+ select @sumcost2 =  Sum(f.Number*p.CostPrice) from [dbo].[EYB_tb_StockOrder] s inner join dbo.EYB_tb_StockOrderInfo f on s.OrderNo=f.StockOrderNo
+
+ inner join Eyb_tb_Product   p on f.ProductID=p.ID where type=1  and s.HospitalID=@HospitalID and OrderTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50)) and  IsVerify=2        
+
+ set @sumcost=@sumcost-@sumcost2
+
+ 
+
+ 
+
+ 
+
+--营业收入  
+
+declare @InMoney decimal(18,2)  
+
+select @InMoney=sum(InMoney) from dbo.EYB_tb_DayPay   where HospitalID=@HospitalID  and CreateTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50))    
+
+  
+
+--营业支付  
+
+   
+
+    declare @OutMoney decimal(18,2)  
+
+select @OutMoney= sum(OutMoney) from dbo.EYB_tb_DayPay   where HospitalID=@HospitalID  and CreateTime between cast(@StartTime as varchar(50)) and  cast(@EndTime as varchar(50))    
+
+  
+
+  
+
+ declare @sumname varchar(50)      
+
+ select @sumname=Name from dbo.EYB_tb_Hospital  where ID=@HospitalID      
+
+           
+
+insert into #tmp values(1,@sumincome,@sumcost,0,@sumname,0,0,getdate(),getdate(),@OutMoney,@InMoney )      
+
+      
+
+select * from #tmp      
+
+      
+
+truncate table #Tmp  --清空临时表的所有数据和约束      
+
+       
+
+END  
